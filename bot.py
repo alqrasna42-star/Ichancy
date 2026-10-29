@@ -100,11 +100,11 @@ def handle_query(call):
 
  bot.send_message(user_id, "🔴 لإتمام عملية شحن الرصيد، يرجى التواصل مع الإدارة أو تحويل المبلغ وإرسال الإيصال هنا.")
 
-elif call.data == 'withdraw':
+ elif call.data == 'withdraw':
 
-bot.answer_callback_query(call.id)
+ bot.answer_callback_query(call.id)
 
-bot.send_message(user_id, "🟩 يرجى إرسال المبلغ المراد سحبه ومعلومات الحساب الخاص بك.")
+ bot.send_message(user_id, "🟩 يرجى إرسال المبلغ المراد سحبه ومعلومات الحساب الخاص بك.")
 
 elif call.data == 'ichancy_account_manage':
 
@@ -134,15 +134,15 @@ url_markup.add(types.InlineKeyboardButton("🔗 فتح موقع ايشاني", u
 
 bot.send_message(user_id, msg_text, reply_markup=url_markup)
 
-elif call.data == 'support':
+ elif call.data == 'support':
 
-bot.answer_callback_query(call.id)
+ bot.answer_callback_query(call.id)
 
-bot.send_message(user_id, "📞 للتواصل مع فريق الدعم الفني، اكتب رسالتك وسيتم تحويلها للإدارة مباشرة.")
+ bot.send_message(user_id, "📞 للتواصل مع فريق الدعم الفني، اكتب رسالتك وسيتم تحويلها للإدارة مباشرة.")
 
 else:
 
-bot.answer_callback_query(call.id, "هذا الزر قيد الخدمة والتحديث.")
+ bot.answer_callback_query(call.id, "هذا الزر قيد الخدمة والتحديث.")
 
 # تشغيل البوت بثبات
 
