@@ -79,3 +79,5 @@ def send_welcome(message):
 # معالجة الضغط على الأزرار
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
+        pass
+
