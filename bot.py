@@ -18,9 +18,9 @@ ICHANCY_URL = 'https://www.ichancy.com'
 
 def send_welcome(message):
 
-user_id = message.from_user.id
+ user_id = message.from_user.id
 
-balance = 0.0
+ balance = 0.0
 
 ichancy_acc = 'غير مسجل'
 
