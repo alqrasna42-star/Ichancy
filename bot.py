@@ -92,13 +92,13 @@ bot.send_message(message.chat.id, text, reply_markup=markup)
 
 def handle_query(call):
 
-user_id = call.from_user.id
+ user_id = call.from_user.id
 
-if call.data == 'deposit':
+ if call.data == 'deposit':
 
-bot.answer_callback_query(call.id)
+ bot.answer_callback_query(call.id)
 
-bot.send_message(user_id, "🔴 لإتمام عملية شحن الرصيد، يرجى التواصل مع الإدارة أو تحويل المبلغ وإرسال الإيصال هنا.")
+ bot.send_message(user_id, "🔴 لإتمام عملية شحن الرصيد، يرجى التواصل مع الإدارة أو تحويل المبلغ وإرسال الإيصال هنا.")
 
 elif call.data == 'withdraw':
 
