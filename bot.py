@@ -3,10 +3,10 @@ import sqlite3
 from flask import Flask
 import threading
 
-TOKEN = "9021613013:"9021613013:AAH14nGg2KbW7gIhhHz9Y3C3e31-nxCOGoE"
+TOKEN = "9021613013:AAH14nGg2KbW7gIhhHz9Y3C3e31-nxCOGoE"
 bot = telebot.TeleBot(TOKEN)
 
-# إنشاء قاعدة البيانات والحداول تلقائياً فور تشغيل البوت
+# إنشاء قاعدة البيانات والجداول تلقائياً فور تشغيل البوت
 def init_db():
     conn = sqlite3.connect('dockers_system.db', check_same_thread=False)
     cursor = conn.cursor()
