@@ -4,8 +4,7 @@ import threading
 import os
 
 # توكن البوت الخاص بك
-TOKEN = os.getenv('BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE')
-bot = telebot.TeleBot(TOKEN)
+TOKEN = 9021613013:AAH14nGg2KbW7gIhhHz9Y3C3e31-nxCOGoE
 
 # إنشاء سيرفر ويب وهمي لمنع رندر من إيقاف البوت
 app = Flask('')
