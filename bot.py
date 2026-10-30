@@ -1,12 +1,10 @@
 import telebot
 from flask import Flask
 import threading
-import os
 
-# توكن البوت الخاص بك
-TOKEN = 9021613013:AAH14nGg2KbW7gIhhHz9Y3C3e31-nxCOGoE
+TOKEN = "9021613013:AAH14nGG2KbW7gIhHhZ9Y3C3e3l-nxCOGoE"
+bot = telebot.TeleBot(TOKEN)
 
-# إنشاء سيرفر ويب وهمي لمنع رندر من إيقاف البوت
 app = Flask('')
 
 @app.route('/')
@@ -20,7 +18,6 @@ def keep_alive():
     t = threading.Thread(target=run)
     t.start()
 
-# أوامر البوت الأساسية
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     chat_id = message.chat.id
@@ -44,14 +41,10 @@ def send_welcome(message):
         )
         bot.send_message(chat_id, user_text, parse_mode="Markdown")
 
-# معالجة الضغط على الأزرار
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
     pass
 
 if __name__ == '__main__':
-    # تشغيل سيرفر الويب أولاً
     keep_alive()
-    # تشغيل البوت
-    print("Bot is starting...")
     bot.infinity_polling()
