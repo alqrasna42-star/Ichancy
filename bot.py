@@ -2,10 +2,10 @@ import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
-# التوكن الصحيح الخاص ببوتك يا معلم أبو النور
+# توكن البوت الخاص بك الصحيح
 TOKEN = "9021613013:AAH14nGg2KbW7gIhhHz9Y3C3e31-nxCOGoE"
 
-# قاعدة بيانات وهمية لتجربة الرصيد (يمكن ربطها بـ SQLite لاحقاً)
+# قاعدة بيانات وهمية لتجربة الرصيد (في الواقع يفضل ربطها بـ SQLite أو PostgreSQL)
 USER_DATA = {}
 
 def get_user(user_id, username):
@@ -33,7 +33,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 USER_DATA[referrer_id]["balance"] += 500  # هدية الإحالة كمثال
 
     text = (
-        f"🛠 **أهلاً بك يا معلمي أبو النور في بوت الشحن والخدمات** 🛠\n\n"
+        f"👋 أهلاً بك {user.first_name} في بوت الشحن والخدمات المالي الآلي!\n\n"
         f"💳 <b>رصيدك الحالي:</b> {db_user['balance']} ليرة / نقطة\n"
         f"👥 <b>عدد الإحالات:</b> {db_user['referrals']}\n\n"
         "الرجاء اختيار أحد الخيارات من القائمة أدناه لقضاء خدماتك تلقائياً:"
@@ -89,11 +89,12 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
 
     elif query.data == "support":
-        text = "📞 للتواصل المباشر مع إدارة البوت أو تقديم شكاوى وإرسال فواتير الشحن، يرجى مراسلة الحساب الإداري."
+        text = "📞 للتواصل المباشر مع إدارة البوت أو تقديم شكاوى وإرسال فواتير الشحن، يرجى مراسلة الحساب: @Your_Support_Handle"
         keyboard = [[InlineKeyboardButton("🔙 العودة للقائمة الرئيسية", callback_data="main_menu")]]
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif query.data == "main_menu":
+        # إعادة إظهار القائمة الرئيسية
         text = (
             f"💳 <b>رصيدك الحالي:</b> {db_user['balance']} ليرة / نقطة\n"
             f"👥 <b>عدد الإحالات:</b> {db_user['referrals']}\n\n"
@@ -108,7 +109,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML")
 
 def main():
-    # بناء التطبيق وتمرير التوكن الصحيح
+    # بناء التطبيق وتمرير التوكن
     application = Application.builder().token(TOKEN).build()
 
     # إضافة الأوامر والمستمعين
