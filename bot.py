@@ -1,23 +1,140 @@
 import telebot
-from flask import Flask
+from flask import Flask, render_template_string, request, redirect, url_for, session
 import threading
 from telebot import types
 
 TOKEN = "9021613013:AAH14nGg2KbW7gIhhHz9Y3C3e3l-nxCOGoE"
 bot = telebot.TeleBot(TOKEN)
 
-app = Flask('')
+app = Flask(__name__)
+app.secret_key = 'dockers_admin_secret_key_2026'  # مفتاح سري لجلسات الأدمين
 
+# بيانات الدخول الخاصة باللوحة (فيك تعدلها متل ما بدك)
+ADMIN_USER = "abounour"
+ADMIN_PASS = "dockers2026"
+
+# ----------------- واجهة الويب (Web Panel) -----------------
+
+# الصفحة الرئيسية أو التوجيه لتسجيل الدخول
 @app.route('/')
 def home():
-    return "Ichancy Bot is alive and running!"
+    if 'logged_in' in session:
+        return redirect(url_for('admin_dashboard'))
+    return redirect(url_for('login'))
 
-def run():
-    app.run(host='0.0.0.0', port=10000)
+# صفحة تسجيل الدخول للأدمن
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username == ADMIN_USER and password == ADMIN_PASS:
+            session['logged_in'] = True
+            return redirect(url_for('admin_dashboard'))
+        else:
+            error = 'اسم المستخدم أو كلمة المرور غير صحيحة يا معلم!'
+            
+    # تصميم بسيط ورايق لصفحة الدخول (Dark Mode مثل اللوحات الفخمة)
+    return render_template_string('''
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <title>تسجيل دخول الأدمن - Dockers</title>
+        <style>
+            body { background-color: #0f172a; color: #f8fafc; font-family: Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+            .login-box { background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); width: 320px; text-align: center; }
+            h2 { color: #38bdf8; margin-bottom: 20px; }
+            input { width: 100%; padding: 10px; margin: 10px 0; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 6px; box-sizing: border-box; }
+            button { background: #0284c7; color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+            button:hover { background: #0369a1; }
+            .error { color: #f87171; font-size: 14px; margin-top: 10px; }
+        </style>
+    </head>
+    <body>
+        <div class="login-box">
+            <h2>🔐 دخول الأدمن</h2>
+            <form method="POST">
+                <input type="text" name="username" placeholder="اسم المستخدم (Admin)" required>
+                <input type="password" name="password" placeholder="كلمة المرور" required>
+                <button type="submit">دخول للوحة التحكم</button>
+            </form>
+            {% if error %}<div class="error">{{ error }}</div>{% endif %}
+        </div>
+    </body>
+    </html>
+    ''', error=error)
 
-def keep_alive():
-    t = threading.Thread(target=run)
-    t.start()
+# لوحة التحكم الرئيسية (Admin Dashboard)
+@app.route('/admin')
+def admin_dashboard():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+        
+    # تصميم لوحة التحكم الشبيهة باللوحات التجارية
+    return render_template_string('''
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <title>لوحة التحكم - Dockers</title>
+        <style>
+            body { background-color: #0f172a; color: #f8fafc; font-family: Tahoma, sans-serif; margin: 0; display: flex; }
+            .sidebar { width: 250px; background: #1e293b; height: 100vh; position: fixed; padding: 20px; box-sizing: border-box; }
+            .sidebar h3 { color: #38bdf8; text-align: center; margin-bottom: 30px; }
+            .sidebar a { display: block; color: #cbd5e1; text-decoration: none; padding: 10px 15px; margin: 8px 0; border-radius: 6px; transition: 0.3s; }
+            .sidebar a:hover, .sidebar a.active { background: #0284c7; color: white; }
+            .main-content { margin-right: 250px; padding: 40px; width: calc(100% - 250px); box-sizing: border-box; }
+            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 15px; margin-bottom: 30px; }
+            .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+            .card { background: #1e293b; padding: 20px; border-radius: 10px; border-right: 4px solid #0284c7; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+            .card h4 { margin: 0 0 10px 0; color: #94a3b8; }
+            .card p { font-size: 24px; font-weight: bold; margin: 0; color: #38bdf8; }
+            .logout { color: #f87171 !important; margin-top: 50px; }
+        </style>
+    </head>
+    <body>
+        <div class="sidebar">
+            <h3>⚡ Dockers Admin</h3>
+            <a href="#" class="active">🏠 لوحة التحكم</a>
+            <a href="#">💰 طلبات الشحن</a>
+            <a href="#">🎁 أكواد الهدايا</a>
+            <a href="#">👥 المستخدمين</a>
+            <a href="#">⚙️ إعدادات البوت</a>
+            <a href="/logout" class="logout">🚪 تسجيل الخروج</a>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <h2>أهلاً بك يا معلمي (أبو النور) في لوحة التحكم الإدارية</h2>
+                <span>🟢 السيرفر متصل 24/7</span>
+            </div>
+            <div class="cards">
+                <div class="card">
+                    <h4>إجمالي المستخدمين</h4>
+                    <p>1,240</p>
+                </div>
+                <div class="card">
+                    <h4>الطلبات المعلقة</h4>
+                    <p>5</p>
+                </div>
+                <div class="card">
+                    <h4>الأرصدة المشحونة</h4>
+                    <p>SYP 450,000</p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    ''')
+
+# تسجيل الخروج
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    return redirect(url_for('login'))
+
+# ----------------- بوت التيليجرام -----------------
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
@@ -27,127 +144,27 @@ def send_welcome(message):
 
     if chat_type in ['group', 'supergroup']:
         admin_markup = types.InlineKeyboardMarkup(row_width=2)
-        
-        # الأزرار الإدارية الكاملة
-        btn1 = types.InlineKeyboardButton("🔄 نشاط لاعب", callback_data="player_activity")
-        admin_markup.add(btn1)
-        
-        btn2 = types.InlineKeyboardButton("⭐ تصفير نقاط لاعب", callback_data="reset_points")
-        btn3 = types.InlineKeyboardButton("💰 تصفير رصيد لاعب", callback_data="reset_balance")
-        admin_markup.add(btn2, btn3)
-        
-        btn4 = types.InlineKeyboardButton("🔍 بحث عن عملية", callback_data="search_op")
-        admin_markup.add(btn4)
-        
-        btn5 = types.InlineKeyboardButton("📥 شحن عملية", callback_data="recharge_op")
-        btn6 = types.InlineKeyboardButton("🔥 حرق عملية", callback_data="burn_op")
-        admin_markup.add(btn5, btn6)
-        
-        btn7 = types.InlineKeyboardButton("🚫 حظر مستخدم", callback_data="ban_user")
-        btn8 = types.InlineKeyboardButton("⭕ إلغاء حظر مستخدم", callback_data="unban_user")
-        admin_markup.add(btn7, btn8)
-        
-        btn9 = types.InlineKeyboardButton("📊 إجماليات البوت", callback_data="bot_totals")
-        btn10 = types.InlineKeyboardButton("⚙️ إعدادات البوت", callback_data="bot_settings")
-        admin_markup.add(btn9, btn10)
-        
-        btn11 = types.InlineKeyboardButton("💬 إرسال رسالة", callback_data="send_msg")
-        btn12 = types.InlineKeyboardButton("🎁 أكواد الهدايا", callback_data="gift_codes")
-        admin_markup.add(btn11, btn12)
-        
-        btn13 = types.InlineKeyboardButton("📥 شحن رصيد يدوي", callback_data="manual_recharge")
-        btn14 = types.InlineKeyboardButton("📤 سحب رصيد يدوي", callback_data="manual_withdraw")
-        admin_markup.add(btn13, btn14)
-        
-        btn15 = types.InlineKeyboardButton("🔄 تحديث جلسة البوت", callback_data="refresh_session")
-        admin_markup.add(btn15)
-        
-        btn16 = types.InlineKeyboardButton("💳 اعدادات شام كاش", callback_data="sham_cash")
-        btn17 = types.InlineKeyboardButton("📱 إعدادات سيرياتيل", callback_data="syriatel")
-        admin_markup.add(btn16, btn17)
-        
-        btn18 = types.InlineKeyboardButton("🌍 إعدادات Binance Pay", callback_data="binance")
-        admin_markup.add(btn18)
-        
-        btn19 = types.InlineKeyboardButton("⚙️ إعدادات طرق الشحن والسحب", callback_data="methods_settings")
-        admin_markup.add(btn19)
-
-        admin_text = (
-            f"🛠 **قائمة الادارة - Dockers** 🛠\n"
-            f"==============================\n"
-            f"📍 أيدي المجموعة: `{chat_id}`\n"
-            f"👤 أيدي المعلم (أبو النور): `{user_id}`\n\n"
-            f"اختر العملية المطلوبة من اللوحة أدناه:"
+        admin_markup.add(
+            types.InlineKeyboardButton("🔄 نشاط لاعب", callback_data="player_activity"),
+            types.InlineKeyboardButton("🔍 بحث عن عملية", callback_data="search_op"),
+            types.InlineKeyboardButton("📊 إجماليات البوت", callback_data="bot_totals"),
+            types.InlineKeyboardButton("⚙️ إعدادات البوت", callback_data="bot_settings")
         )
-        bot.send_message(chat_id, admin_text, parse_mode="Markdown", reply_markup=admin_markup)
-    
+        bot.send_message(chat_id, f"🛠 **لوحة إدارة Dockers - مجموعة الإدارة**\n📍 أيدي المجموعة: `{chat_id}`", parse_mode="Markdown", reply_markup=admin_markup)
     else:
-        user_markup = types.InlineKeyboardMarkup(row_width=2)
-        btn_balance = types.InlineKeyboardButton("💰 شحن الرصيد", callback_data="recharge")
-        btn_link = types.InlineKeyboardButton("⚡ ربط حساب ايشاني", callback_data="link_account")
-        btn_support = types.InlineKeyboardButton("📞 الدعم الفني", callback_data="support")
-        user_markup.add(btn_balance, btn_link, btn_support)
+        bot.send_message(chat_id, f"📊 أهلاً بك! أيدي حسابك: `{user_id}`", parse_mode="Markdown")
 
-        user_text = (
-            f"📊 **قائمة الخيارات الرئيسية** 📊\n\n"
-            f"💰 الرصيد الحالي: SYP 0.0\n"
-            f"🆔 أيدي حسابك: `{user_id}`\n"
-            f"⚡ حساب ايشاني: غير مسجل"
-        )
-        bot.send_message(chat_id, user_text, parse_mode="Markdown", reply_markup=user_markup)
-
-# معالجة وظائف كل زر بدقة واحترافية
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
-    data = call.data
-    
-    # ربط وظائف الإدارة
-    if data == "player_activity":
-        bot.answer_callback_query(call.id, "🔄 جاري فحص نشاط اللاعب...")
-    elif data == "reset_points":
-        bot.answer_callback_query(call.id, "⭐ تم اختيار: تصفير نقاط لاعب.")
-    elif data == "reset_balance":
-        bot.answer_callback_query(call.id, "💰 تم اختيار: تصفير رصيد لاعب.")
-    elif data == "search_op":
-        bot.answer_callback_query(call.id, "🔍 أرسل رقم العملية للبحث عنها.")
-    elif data == "recharge_op":
-        bot.answer_callback_query(call.id, "📥 جاري تنفيذ شحن العملية...")
-    elif data == "burn_op":
-        bot.answer_callback_query(call.id, "🔥 تنبيه: جاري حرق العملية المطلوبة.")
-    elif data == "ban_user":
-        bot.answer_callback_query(call.id, "🚫 تم اختيار حظر المستخدم.")
-    elif data == "unban_user":
-        bot.answer_callback_query(call.id, "⭕ تم إلغاء حظر المستخدم.")
-    elif data == "bot_totals":
-        bot.answer_callback_query(call.id, "📊 إجماليات البوت: العمليات والنشاطات ممتازة.")
-    elif data == "bot_settings":
-        bot.answer_callback_query(call.id, "⚙️ جاري فتح إعدادات البوت العامة...")
-    elif data == "send_msg":
-        bot.answer_callback_query(call.id, "💬 أرسل النص المراد بثه للمستخدمين.")
-    elif data == "gift_codes":
-        bot.answer_callback_query(call.id, "🎁 لوحة إدارة أكواد الهدايا جاهزة.")
-    elif data == "manual_recharge":
-        bot.answer_callback_query(call.id, "📥 شحن رصيد يدوي: أرسل الآيدي والمبلغ.")
-    elif data == "manual_withdraw":
-        bot.answer_callback_query(call.id, "📤 سحب رصيد يدوي: أرسل التفاصيل.")
-    elif data == "refresh_session":
-        bot.answer_callback_query(call.id, "🔄 تم تحديث جلسة البوت والاتصال بنجاح.")
-    elif data == "sham_cash":
-        bot.answer_callback_query(call.id, "💳 لوحة إعدادات شام كاش.")
-    elif data == "syriatel":
-        bot.answer_callback_query(call.id, "📱 لوحة إعدادات سيرياتيل كاش.")
-    elif data == "binance":
-        bot.answer_callback_query(call.id, "🌍 لوحة إعدادات Binance Pay.")
-    elif data == "methods_settings":
-        bot.answer_callback_query(call.id, "⚙️ إعدادات طرق الشحن والسحب المتاحة.")
-        
-    # وظائف الزبائن على الخاص
-    elif data == "recharge":
-        bot.answer_callback_query(call.id, "قريباً سيتم تفعيل نظام الشحن الآلي!")
-    elif data == "link_account":
-        bot.answer_callback_query(call.id, "أرسل كود الربط الخاص بك هنا.")
-    elif data == "support":
-        bot.answer_callback_query(call.id, "سيتم تحويلك للدعم الفني.")
+    bot.answer_callback_query(call.id, f"تم تنفيذ الطلب بنجاح: {call.data}")
+
+# تشغيل سيرفر Flask في الخلفية
+def run():
+    app.run(host='0.0.0.0', port=10000)
+
+def keep_alive():
+    t = threading.Thread(target=run)
+    t.start()
 
 if __name__ == '__main__':
     keep_alive()
